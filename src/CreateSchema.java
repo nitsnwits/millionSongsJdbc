@@ -34,7 +34,7 @@ public class CreateSchema {
 		
 		//get database connection
 		JDBCConnection jdbcConnection = new JDBCConnection();
-		Connection dbConnection = jdbcConnection.getConnection();		
+		Connection dbConnection = jdbcConnection.getConnection();
 		
 		HashMap<String, String> tableHash = new HashMap<String, String>();
 		Set<String> schemaKeys = schema.keySet();

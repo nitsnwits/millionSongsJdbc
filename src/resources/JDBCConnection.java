@@ -5,6 +5,7 @@ package resources;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
@@ -72,8 +73,7 @@ public class JDBCConnection {
 		try {
 			String productId = data[1];
 			
-			Statement preparedStatement;
-			preparedStatement = this.jdbcConnection.createStatement();		
+			Statement preparedStatement = this.jdbcConnection.createStatement();	
 			String sql = "INSERT into amazon (product_id) values ('" + productId + "');";
 			//Log.logger.info(sql);
 			preparedStatement.executeUpdate(sql);
@@ -88,6 +88,9 @@ public class JDBCConnection {
 	}
 	
 	public void createTable(HashMap<String, String> tableHash, String tableName) {
+		//drop the table if exists
+		StringBuilder sqlDrop = new StringBuilder();
+		sqlDrop.append("DROP TABLE IF EXISTS " + tableName);
 		//use sb to create create table statement and execute it using the associated connection
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE " + tableName + " ( ");
@@ -104,12 +107,22 @@ public class JDBCConnection {
 		StringBuilder sqlGrant = new StringBuilder();
 		sqlGrant.append("ALTER TABLE " + tableName + " OWNER TO postgres");
 		try {
-			Statement tableStatement;
-			tableStatement = this.jdbcConnection.createStatement();
-			boolean result = tableStatement.execute(sql.toString());
-			//tableStatement.execute(sqlGrant.toString());
-			Log.logger.info("result " + result);
+			//drop the table
+			PreparedStatement tableStatement = this.jdbcConnection.prepareStatement(sqlDrop.toString());
+			boolean result = tableStatement.execute();
+			
+			//create the table
+			tableStatement = this.jdbcConnection.prepareStatement(sql.toString());
+			result = tableStatement.execute();
+			
+			//grant ownership
+			tableStatement = this.jdbcConnection.prepareStatement(sqlGrant.toString());
+			tableStatement.execute();
+
+			//commit the transaction
+			this.jdbcConnection.commit();
 		} catch (SQLException e) {
+			e.printStackTrace();
 			Log.logger.error("Unable to execute DDL create table statement");
 		} catch (NullPointerException e) {
 			Log.logger.error("Got null pointer exception running DDL with database");
