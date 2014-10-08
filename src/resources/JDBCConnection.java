@@ -77,6 +77,7 @@ public class JDBCConnection {
 			String sql = "INSERT into amazon (product_id) values ('" + productId + "');";
 			//Log.logger.info(sql);
 			preparedStatement.executeUpdate(sql);
+			preparedStatement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Log.logger.error("Unable to insert to database");
@@ -86,7 +87,33 @@ public class JDBCConnection {
 		}
 	}
 	
-	public void createTable(HashMap<String, String> tableHash) {
+	public void createTable(HashMap<String, String> tableHash, String tableName) {
+		//use sb to create create table statement and execute it using the associated connection
+		StringBuilder sql = new StringBuilder();
+		sql.append("CREATE TABLE " + tableName + " ( ");
+		for (String columnName: tableHash.keySet()) {
+			sql.append(columnName + " " + tableHash.get(columnName) + ", ");
+		}
+		//remove trailing comma and space
+		sql.deleteCharAt(sql.length() - 2);
+		//complete sql query
+		sql.append(") WITH ( OIDS = FALSE )");
+		Log.logger.info("Create table: " + sql.toString());
+		
+		//create ownership sql
+		StringBuilder sqlGrant = new StringBuilder();
+		sqlGrant.append("ALTER TABLE " + tableName + " OWNER TO postgres");
+		try {
+			Statement tableStatement;
+			tableStatement = this.jdbcConnection.createStatement();
+			boolean result = tableStatement.execute(sql.toString());
+			//tableStatement.execute(sqlGrant.toString());
+			Log.logger.info("result " + result);
+		} catch (SQLException e) {
+			Log.logger.error("Unable to execute DDL create table statement");
+		} catch (NullPointerException e) {
+			Log.logger.error("Got null pointer exception running DDL with database");
+		}
 		
 	}
 }
