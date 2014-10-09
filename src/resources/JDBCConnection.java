@@ -7,7 +7,6 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 
 import org.json.simple.JSONObject;
@@ -69,15 +68,30 @@ public class JDBCConnection {
 		}
 	}
 	
-	public void insert(String[] data) {
+	public void insert(HashMap<String, String> row) {
 		try {
-			String productId = data[1];
+			StringBuilder sqlInsert = new StringBuilder();
+			sqlInsert.append("INSERT INTO amazon_reviews (");
+			sqlInsert.append("product_id, title, price, ");
+			sqlInsert.append("user_id, profile_name, helpfulness, score, review_time, review_summary ) values (");
 			
-			Statement preparedStatement = this.jdbcConnection.createStatement();	
-			String sql = "INSERT into amazon (product_id) values ('" + productId + "');";
-			//Log.logger.info(sql);
-			preparedStatement.executeUpdate(sql);
+			String product_id = "'" + row.get("productId") + "', ";
+			String title = "'" + row.get("title") + "', ";
+			String price = "'" + row.get("price") + "', ";
+			String user_id = "'" + row.get("userId") + "', ";
+			String profile_name = "'" + row.get("profileName") + "', ";
+			String helpfulness = "'" + row.get("helpfulness") + "', ";
+			String review_summary = "'" + row.get("summary") + "')";
+			
+			sqlInsert.append(product_id + title + price + user_id + profile_name + helpfulness + row.get("score") + ", " + row.get("time") + ", " + review_summary);
+
+			//Log.logger.info("insert: " + sqlInsert.toString());
+			
+			PreparedStatement preparedStatement = this.jdbcConnection.prepareStatement(sqlInsert.toString());
+
+			preparedStatement.executeUpdate();
 			preparedStatement.close();
+
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Log.logger.error("Unable to insert to database");
@@ -121,6 +135,7 @@ public class JDBCConnection {
 
 			//commit the transaction
 			this.jdbcConnection.commit();
+			tableStatement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			Log.logger.error("Unable to execute DDL create table statement");
@@ -128,5 +143,13 @@ public class JDBCConnection {
 			Log.logger.error("Got null pointer exception running DDL with database");
 		}
 		
+	}
+	
+	public void close() {
+		try {
+			this.jdbcConnection.close();
+		} catch (SQLException e) {
+			Log.logger.error("Unable to close database connection.");
+		}
 	}
 }

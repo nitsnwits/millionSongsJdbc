@@ -17,7 +17,8 @@ import resources.ReadConfig;
  *
  */
 public class CreateSchema {
-
+	private JDBCConnection dbConnection;
+	
 	/**
 	 * Create tables based on schema config
 	 */
@@ -36,6 +37,9 @@ public class CreateSchema {
 		JDBCConnection jdbcConnection = new JDBCConnection();
 		Connection dbConnection = jdbcConnection.getConnection();
 		
+		//set internal values
+		this.dbConnection = jdbcConnection;
+		
 		HashMap<String, String> tableHash = new HashMap<String, String>();
 		Set<String> schemaKeys = schema.keySet();
 		for (String key: schemaKeys) {
@@ -53,6 +57,12 @@ public class CreateSchema {
 			//reset hash
 			tableHash = new HashMap<String, String>();
 		}		
+	}
+	
+	public String[] getTableSchema() {
+		//TODO: Use tableSchema to insert directly to tables than defining columns
+		String[] tableSchema = new String[10];
+		return tableSchema;
 	}
 
 }

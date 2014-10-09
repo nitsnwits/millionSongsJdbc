@@ -12,6 +12,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -20,7 +21,7 @@ import java.util.zip.GZIPInputStream;
  */
 
 public class ParseFile {
-	
+
 	public void parse(String filePath) {
 		InputStream fileStream;
 		String line = null;
@@ -28,30 +29,54 @@ public class ParseFile {
 		int rowNumber = 1;
 		JDBCConnection jdbcConnection = new JDBCConnection();
 		Connection dbConnection = jdbcConnection.getConnection();
-		
+
 		try {
 			//read the gzip file directly, to avoid decompression
 			fileStream = new FileInputStream(filePath);
 			InputStream gzipStream = new GZIPInputStream(fileStream);
 			Reader decoder = new InputStreamReader(gzipStream, "UTF-8");
 			BufferedReader buffered = new BufferedReader(decoder);
-			
+
+			HashMap<String, String> reviews = new HashMap<String, String>();
+
+			//read the file line by line
 			while ((line = buffered.readLine()) != null) {
-				//because first 10 lines represent one row, 11th line is separator for next row
-				if(rowSeparator == 11){
-					rowSeparator = 0;
-					break; //break at one row, temporarily
-				} else {
-					//Log.logger.info(Integer.toString(i));
-					String[] parts = line.split(":");
-					if (parts.length > 1) {
-						//Log.logger.info(parts[1].toString());
-						jdbcConnection.insert(parts);
+				//blank line is a row separator
+				if (line.length()!=0) {
+
+					if (line.startsWith("product")){
+						//split the row on : delimiter
+						String[] string = line.split(":");
+						String[] key = string[0].split("/");
+						
+						//put the key as hash key, and value as hash value
+						if(string[1].contains("'")) {
+							string[1] = string[1].replace("'", "''");
+						}
+						reviews.put(key[1], string[1].trim());
+						
+					} else if(line.startsWith("review")){
+						//split the row on : delimiter
+						String[] string = line.split(":");
+						String[] key = string[0].split("/");
+						
+						//put the key as hash key, and value as hash value
+						if(string[1].contains("'")) {
+							string[1] = string[1].replace("'", "''");
+						}
+						reviews.put(key[1], string[1].trim());
+						
 					}
-					
-					rowSeparator++;
+
+				} else {
+					jdbcConnection.insert(reviews);
+					if (rowNumber % 10000 == 0) {
+						Log.logger.info("Commited rows: " + rowNumber);
+						jdbcConnection.commit();
+					}
+					reviews = new HashMap<String, String>();
+					rowNumber++;
 				}
-				rowNumber++;
 			}
 			
 		} catch (FileNotFoundException e) {
@@ -59,6 +84,7 @@ public class ParseFile {
 		} catch (IOException e) {
 			Log.logger.error("Unable to read file: ", filePath);
 		} finally {
+			Log.logger.info("Completed insertion: " + rowNumber);
 			jdbcConnection.commit();
 		}
 
