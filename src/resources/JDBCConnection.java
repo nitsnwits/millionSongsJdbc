@@ -115,7 +115,7 @@ public class JDBCConnection {
 		sql.deleteCharAt(sql.length() - 2);
 		//complete sql query
 		sql.append(") WITH ( OIDS = FALSE )");
-		Log.logger.info("Create table: " + sql.toString());
+		//Log.logger.info("Create table: " + sql.toString());
 		
 		//create ownership sql
 		StringBuilder sqlGrant = new StringBuilder();

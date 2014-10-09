@@ -52,7 +52,7 @@ public class CreateSchema {
 			}
 			//create schema for this table
 			Log.logger.info("Creating table: " + key);
-			Log.logger.info("table details: " + tableHash);
+			//Log.logger.info("table details: " + tableHash);
 			jdbcConnection.createTable(tableHash, key);
 			//reset hash
 			tableHash = new HashMap<String, String>();

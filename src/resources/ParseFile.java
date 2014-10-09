@@ -70,7 +70,7 @@ public class ParseFile {
 
 				} else {
 					jdbcConnection.insert(reviews);
-					if (rowNumber % 10000 == 0) {
+					if (rowNumber % 100000 == 0) {
 						Log.logger.info("Commited rows: " + rowNumber);
 						jdbcConnection.commit();
 					}
@@ -86,6 +86,7 @@ public class ParseFile {
 		} finally {
 			Log.logger.info("Completed insertion: " + rowNumber);
 			jdbcConnection.commit();
+			jdbcConnection.close();
 		}
 
 	}
