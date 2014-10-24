@@ -72,6 +72,13 @@ public class ParseFile {
 					}
 
 				} else {
+					//check if reviews contains the valid columns, else create default values
+//					if(!reviews.containsKey("product_id")) {
+//						reviews.put("product_id", "defaultProductId")
+//					}
+					if(!reviews.containsKey("text")) {
+						reviews.put("text", "");
+					}
 					jdbcConnection.insert(reviews, "amazon_reviews");
 					if (rowNumber % 100000 == 0) {
 						Log.logger.info("Commited rows: " + rowNumber);

@@ -83,7 +83,7 @@ public class JDBCConnection {
 			StringBuilder sqlInsert = new StringBuilder();
 			sqlInsert.append("INSERT INTO amazon_reviews (");
 			sqlInsert.append("id, product_id, title, price, ");
-			sqlInsert.append("user_id, profile_name, helpfulness, score, review_time, review_summary ) values (");
+			sqlInsert.append("user_id, profile_name, helpfulness, score, review_time, review_summary, review_text ) values (");
 			
 			String id = "'" + GenerateUUID.get().toString() + "', ";
 			String product_id = "'" + row.get("productId") + "', ";
@@ -92,9 +92,10 @@ public class JDBCConnection {
 			String user_id = "'" + row.get("userId") + "', ";
 			String profile_name = "'" + row.get("profileName") + "', ";
 			String helpfulness = "'" + row.get("helpfulness") + "', ";
-			String review_summary = "'" + row.get("summary") + "')";
+			String review_summary = "'" + row.get("summary") + "', ";
+			String review_text = "'" + row.get("text") + "')";
 			
-			sqlInsert.append(id + product_id + title + price + user_id + profile_name + helpfulness + row.get("score") + ", " + row.get("time") + ", " + review_summary);
+			sqlInsert.append(id + product_id + title + price + user_id + profile_name + helpfulness + row.get("score") + ", " + row.get("time") + ", " + review_summary + review_text);;
 
 			//Log.logger.info("insert: " + sqlInsert.toString());
 			
