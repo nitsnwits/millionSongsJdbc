@@ -20,6 +20,10 @@ public class JDBCConnection {
 	private Connection jdbcConnection;
 	private String pgsqlUrl, pgsqlUsername, pgsqlPassword;
 	private boolean autoCommit = true;
+	private String sqlInsert = "INSERT INTO amazon_reviews "
+			+ "(id, product_id, title, price, "
+			+ "user_id, profile_name, helpfulness, score, review_time, review_summary, review_text ) VALUES "
+			+ "(?,?,?,?,?,?,?,?,?,?,?)";
 	//Have schema of each table available
 	//private CreateSchema schema;
 	
@@ -80,26 +84,38 @@ public class JDBCConnection {
 	public void insert(HashMap<String, String> row, String tableName) {
 		//Set insert in a table		
 		try {
-			StringBuilder sqlInsert = new StringBuilder();
-			sqlInsert.append("INSERT INTO amazon_reviews (");
-			sqlInsert.append("id, product_id, title, price, ");
-			sqlInsert.append("user_id, profile_name, helpfulness, score, review_time, review_summary, review_text ) values (");
+//			StringBuilder sqlInsert = new StringBuilder();
+//			sqlInsert.append("INSERT INTO amazon_reviews (");
+//			sqlInsert.append("id, product_id, title, price, ");
+//			sqlInsert.append("user_id, profile_name, helpfulness, score, review_time, review_summary, review_text ) values (");
 			
-			String id = "'" + GenerateUUID.get().toString() + "', ";
-			String product_id = "'" + row.get("productId") + "', ";
-			String title = "'" + row.get("title") + "', ";
-			String price = "'" + row.get("price") + "', ";
-			String user_id = "'" + row.get("userId") + "', ";
-			String profile_name = "'" + row.get("profileName") + "', ";
-			String helpfulness = "'" + row.get("helpfulness") + "', ";
-			String review_summary = "'" + row.get("summary") + "', ";
-			String review_text = "'" + row.get("text") + "')";
+//			String id = "'" + GenerateUUID.get().toString() + "', ";
+//			String product_id = "'" + row.get("productId") + "', ";
+//			String title = "'" + row.get("title") + "', ";
+//			String price = "'" + row.get("price") + "', ";
+//			String user_id = "'" + row.get("userId") + "', ";
+//			String profile_name = "'" + row.get("profileName") + "', ";
+//			String helpfulness = "'" + row.get("helpfulness") + "', ";
+//			String review_summary = "'" + row.get("summary") + "', ";
+//			String review_text = "'" + row.get("text") + "')";
 			
-			sqlInsert.append(id + product_id + title + price + user_id + profile_name + helpfulness + row.get("score") + ", " + row.get("time") + ", " + review_summary + review_text);;
+//			sqlInsert.append(id + product_id + title + price + user_id + profile_name + helpfulness + row.get("score") + ", " + row.get("time") + ", " + review_summary + review_text);;
 
 			//Log.logger.info("insert: " + sqlInsert.toString());
 			
-			PreparedStatement preparedStatement = this.jdbcConnection.prepareStatement(sqlInsert.toString());
+			//Set the prepared statement values
+			PreparedStatement preparedStatement = this.jdbcConnection.prepareStatement(sqlInsert);
+			preparedStatement.setString(1, GenerateUUID.get().toString());
+			preparedStatement.setString(2, row.get("productId"));
+			preparedStatement.setString(3, row.get("title"));
+			preparedStatement.setString(4, row.get("price"));
+			preparedStatement.setString(5, row.get("userId"));
+			preparedStatement.setString(6, row.get("profileName"));
+			preparedStatement.setString(7, row.get("helpfulness"));
+			preparedStatement.setDouble(8, Double.parseDouble(row.get("score")));
+			preparedStatement.setInt(9, Integer.parseInt(row.get("time")));
+			preparedStatement.setString(10, row.get("summary"));
+			preparedStatement.setString(11, row.get("text"));
 
 			preparedStatement.executeUpdate();
 			preparedStatement.close();
