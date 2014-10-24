@@ -15,6 +15,8 @@ import java.sql.Connection;
 import java.util.HashMap;
 import java.util.zip.GZIPInputStream;
 
+import resources.CreateSchema;
+
 /**
  * @author neerajsharma
  *
@@ -29,6 +31,7 @@ public class ParseFile {
 		int rowNumber = 1;
 		JDBCConnection jdbcConnection = new JDBCConnection();
 		Connection dbConnection = jdbcConnection.getConnection();
+		
 
 		try {
 			//read the gzip file directly, to avoid decompression
@@ -69,7 +72,7 @@ public class ParseFile {
 					}
 
 				} else {
-					jdbcConnection.insert(reviews);
+					jdbcConnection.insert(reviews, "amazon_reviews");
 					if (rowNumber % 100000 == 0) {
 						Log.logger.info("Commited rows: " + rowNumber);
 						jdbcConnection.commit();

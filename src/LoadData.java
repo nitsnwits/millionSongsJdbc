@@ -8,6 +8,7 @@ import java.util.Set;
 
 import org.json.simple.JSONObject;
 
+import resources.CreateSchema;
 import resources.Log;
 import resources.ParseFile;
 import resources.ReadConfig;
@@ -34,8 +35,8 @@ public class LoadData {
 		String createSchemaOption = config.get(serverConfig, "createSchema");
 		if (createSchemaOption.equals("true")) {
 			Log.logger.info("Creating schema from config file..");
-			CreateSchema schemaCreation = new CreateSchema();
-			schemaCreation.run("config/schema.conf");
+			CreateSchema schemaCreation = new CreateSchema("config/schema.conf");
+			schemaCreation.run();
 		}
 		
 		//use one instance of parsefile

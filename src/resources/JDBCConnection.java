@@ -9,6 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 
+import resources.GenerateUUID;
 import org.json.simple.JSONObject;
 
 /**
@@ -17,46 +18,54 @@ import org.json.simple.JSONObject;
  */
 public class JDBCConnection {
 	private Connection jdbcConnection;
+	private String pgsqlUrl, pgsqlUsername, pgsqlPassword;
+	private boolean autoCommit = true;
+	//Have schema of each table available
+	//private CreateSchema schema;
 	
-	public Connection getConnection() {
-		
-		//check for postgresql drivers
-		try {
-			Class.forName("org.postgresql.Driver");
-		} catch (ClassNotFoundException e) {
-			Log.logger.error("Postgresql driver not loaded.");
-		}
-		
-		//Read database config from config file
+	public JDBCConnection() {
+
+		//Read database config from config file TODO: change interface to read from param
 		ReadConfig config = new ReadConfig("config/server.conf");
+		
+		//this.schema = new CreateSchema("config/schema.conf");
 
 		//read server and postgresql config
 		JSONObject postgreSqlConfig = config.get("postgresql");
 		JSONObject serverConfig = config.get("server");
 		
 		//set JSON keys that are being read from server.conf
-		String pgsqlUrl = "url";
-		String pgsqlUsername = "username";
-		String pgsqlPassword = "password";
+		this.pgsqlUrl = config.get(postgreSqlConfig, "url");
+		this.pgsqlUsername = config.get(postgreSqlConfig, "username");
+		this.pgsqlPassword = config.get(postgreSqlConfig, "password");
+		
+		//somehow, json object is not able to read boolean :(
 		String pgsqlAutoCommit = config.get(postgreSqlConfig, "autoCommit");
-		boolean autoCommit = true;
 		if (pgsqlAutoCommit.equalsIgnoreCase("false")) {
-			autoCommit = false;
+			this.autoCommit = false;
 		} else if (pgsqlAutoCommit.equalsIgnoreCase("true")) {
-			autoCommit = true;
+			this.autoCommit = true;
 		} else {
 			Log.logger.warn("No autocommit configuration set, using default: true");
 		}
 		
-		//try to connect to databases
-		//TODO: Read he postgresql config from server.conf using ReadConfig class -> Done
-		//jdbcConnection = null;
+		//register postgresql drivers
 		try {
-			this.jdbcConnection = DriverManager.getConnection(config.get(postgreSqlConfig, pgsqlUrl), config.get(postgreSqlConfig, pgsqlUsername), config.get(postgreSqlConfig, pgsqlPassword));
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			Log.logger.error("Postgresql driver not loaded.");
+		}
+		
+		//now, create jdbc connection
+		try {
+			this.jdbcConnection = DriverManager.getConnection(pgsqlUrl, pgsqlUsername, pgsqlPassword);
 			this.jdbcConnection.setAutoCommit(autoCommit);
 		} catch (SQLException e) {
 			Log.logger.error("Unable to load connection to database.");
-		}
+		}		
+	}
+	
+	public Connection getConnection() {
 		return this.jdbcConnection;
 	}
 	
@@ -68,13 +77,15 @@ public class JDBCConnection {
 		}
 	}
 	
-	public void insert(HashMap<String, String> row) {
+	public void insert(HashMap<String, String> row, String tableName) {
+		//Set insert in a table		
 		try {
 			StringBuilder sqlInsert = new StringBuilder();
 			sqlInsert.append("INSERT INTO amazon_reviews (");
-			sqlInsert.append("product_id, title, price, ");
+			sqlInsert.append("id, product_id, title, price, ");
 			sqlInsert.append("user_id, profile_name, helpfulness, score, review_time, review_summary ) values (");
 			
+			String id = "'" + GenerateUUID.get().toString() + "', ";
 			String product_id = "'" + row.get("productId") + "', ";
 			String title = "'" + row.get("title") + "', ";
 			String price = "'" + row.get("price") + "', ";
@@ -83,7 +94,7 @@ public class JDBCConnection {
 			String helpfulness = "'" + row.get("helpfulness") + "', ";
 			String review_summary = "'" + row.get("summary") + "')";
 			
-			sqlInsert.append(product_id + title + price + user_id + profile_name + helpfulness + row.get("score") + ", " + row.get("time") + ", " + review_summary);
+			sqlInsert.append(id + product_id + title + price + user_id + profile_name + helpfulness + row.get("score") + ", " + row.get("time") + ", " + review_summary);
 
 			//Log.logger.info("insert: " + sqlInsert.toString());
 			
