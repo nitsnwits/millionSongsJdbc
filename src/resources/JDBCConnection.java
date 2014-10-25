@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 
 import resources.GenerateUUID;
+
 import org.json.simple.JSONObject;
 
 /**
@@ -24,6 +25,7 @@ public class JDBCConnection {
 			+ "(id, product_id, title, price, "
 			+ "user_id, profile_name, helpfulness, score, review_time, review_summary, review_text ) VALUES "
 			+ "(?,?,?,?,?,?,?,?,?,?,?)";
+	//private PreparedStatement preparedStatement;
 	//Have schema of each table available
 	//private CreateSchema schema;
 	
@@ -64,6 +66,9 @@ public class JDBCConnection {
 		try {
 			this.jdbcConnection = DriverManager.getConnection(pgsqlUrl, pgsqlUsername, pgsqlPassword);
 			this.jdbcConnection.setAutoCommit(autoCommit);
+			
+			//create instance's prepared statement for batch processing
+			//this.jdbcConnection.prepareStatement(this.sqlInsert);
 		} catch (SQLException e) {
 			Log.logger.error("Unable to load connection to database.");
 		}		
@@ -72,6 +77,10 @@ public class JDBCConnection {
 	public Connection getConnection() {
 		return this.jdbcConnection;
 	}
+	
+//	public PreparedStatement getPreparedStatement() {
+//		return this.preparedStatement;
+//	}
 	
 	public void commit() {
 		try {
@@ -178,6 +187,62 @@ public class JDBCConnection {
 			this.jdbcConnection.close();
 		} catch (SQLException e) {
 			Log.logger.error("Unable to close database connection.");
+		}
+	}
+	
+	public PreparedStatement prepareStatement() {
+		try {
+			return this.jdbcConnection.prepareStatement(sqlInsert);
+		} catch (SQLException e) {
+			Log.logger.warn("Unable to create prepared statement");
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	public void addToBatch(HashMap<String, String> row, PreparedStatement ps) {
+		//Set the prepared statement values
+		
+		try {
+			ps.setString(1, GenerateUUID.get().toString());
+			ps.setString(2, row.get("productId"));
+			ps.setString(3, row.get("title"));
+			ps.setString(4, row.get("price"));
+			ps.setString(5, row.get("userId"));
+			ps.setString(6, row.get("profileName"));
+			ps.setString(7, row.get("helpfulness"));
+			ps.setDouble(8, Double.parseDouble(row.get("score")));
+			ps.setInt(9, Integer.parseInt(row.get("time")));
+			ps.setString(10, row.get("summary"));
+			ps.setString(11, row.get("text"));
+			ps.addBatch();
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+			Log.logger.warn("Number format exception in adding batches");
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Log.logger.warn("SQL Exception in adding batches");
+		}
+	}
+	
+	public void executeBatch(PreparedStatement ps) {
+		try {
+			//execute the batch and reset prepared statement
+			ps.executeBatch();
+			//reset ps
+			ps.close();
+			//this.preparedStatement = this.jdbcConnection.prepareStatement(sqlInsert);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Log.logger.error("Unable to execute batch, rolling back");
+			
+			//try to rollback
+			try {
+				this.jdbcConnection.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+				Log.logger.error("Unable to rollback the batch, inconsistency may arise");
+			}
 		}
 	}
 }
