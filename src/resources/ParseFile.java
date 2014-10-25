@@ -28,6 +28,7 @@ public class ParseFile {
 		String line = null;
 		int rowSeparator = 0;
 		int rowNumber = 1;
+		int rowId = 1;
 		JDBCConnection jdbcConnection = new JDBCConnection();
 		Connection dbConnection = jdbcConnection.getConnection();
 		PreparedStatement batchPreparedStatement = jdbcConnection.prepareStatement();
@@ -92,6 +93,7 @@ public class ParseFile {
 					rowNumber++;*/			
 					
 					//update the code to handle batches
+					reviews.put("id", ""+rowId);
 					jdbcConnection.addToBatch(reviews, batchPreparedStatement);
 					if(rowNumber % 100000 == 0) {
 						jdbcConnection.executeBatch(batchPreparedStatement);
@@ -100,6 +102,7 @@ public class ParseFile {
 						Log.logger.info("Commit rows: " + rowNumber);
 					}
 					rowNumber++;
+					rowId++;
 				}
 			}
 			//commit the final rows left in the batch, if less than the batch size

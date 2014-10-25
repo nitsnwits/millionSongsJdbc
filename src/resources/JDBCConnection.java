@@ -6,10 +6,9 @@ package resources;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-
-import resources.GenerateUUID;
 
 import org.json.simple.JSONObject;
 
@@ -204,7 +203,9 @@ public class JDBCConnection {
 		//Set the prepared statement values
 		
 		try {
-			ps.setString(1, GenerateUUID.get().toString());
+			//ps.setString(1, GenerateUUID.get().toString());
+			//set sequence id temporarily
+			ps.setInt(1,  Integer.parseInt(row.get("id")));
 			ps.setString(2, row.get("productId"));
 			ps.setString(3, row.get("title"));
 			ps.setString(4, row.get("price"));
@@ -244,5 +245,37 @@ public class JDBCConnection {
 				Log.logger.error("Unable to rollback the batch, inconsistency may arise");
 			}
 		}
+	}
+	
+	public int getCount(String tableName) {
+		String sqlCount = "SELECT count(*) from " + tableName;
+		int count = 0;
+		try {
+			PreparedStatement countStatement = jdbcConnection.prepareStatement(sqlCount);
+			ResultSet countResult = countStatement.executeQuery();
+			if(countResult.next()) {
+				count = countResult.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Log.logger.warn("SQL Exception in getting count.");
+		}
+		return count;
+	}
+	
+	public int selectById(int id, String tableName) {
+		String sqlSelect = "SELECT * from " + tableName + " where id=" + Integer.toString(id);
+		int count = 0;
+		try {
+			PreparedStatement selectStatement = jdbcConnection.prepareStatement(sqlSelect);
+			ResultSet selectResult = selectStatement.executeQuery();
+			if(selectResult.next()) {
+				count = selectResult.getInt("id");
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Log.logger.warn("SQL Exception in getting select statement.");
+		}
+		return count;
 	}
 }
