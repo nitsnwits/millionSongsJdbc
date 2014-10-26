@@ -15,7 +15,7 @@ PGUser=postgres
 PGPassword=data
 
 #create file name based on timestamp
-backupFile=`date +%Y-%m-%d_%H-%M`.tar
+backupFile=`date +%Y-%m-%d_%H-%M`.tar.gz
 
 #Sanity check for older backup
 if [ -f /tmp/backup_in_progress ]
@@ -33,7 +33,8 @@ fi
 echo "Starting full database backup at `date`.."
 touch /tmp/backup_in_progress
 ${PGBIN}/psql -U ${PGUser} -p ${PGPassword} -c "select pg_start_backup('hot_backup');"
-tar -cf ${PGFULLBACKUP}/${backupFile} ${PGDATA}
+tar -czf ${PGFULLBACKUP}/${backupFile} ${PGDATA}
+#gzip ${PGFULLBACKUP}/${backupFile}
 ${PGBIN}/psql -U ${PGUser} -p {PGPassword} -c "select pg_stop_backup();"
 rm /tmp/backup_in_progress
 echo "Full database backup complete. Backup present in ${PGFULLBACKUP}/${backupFile} ."

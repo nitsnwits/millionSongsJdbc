@@ -19,7 +19,7 @@ PGPassword=data
 PGArchiveStorage=${PGHOME}/archiveBackup
 
 #create archive backup file based on timestamp
-backupFile=`date +%Y-%m-%d_%H-%M`.tar
+backupFile=`date +%Y-%m-%d_%H-%M`.tar.gz
 
 #Sanity check for older backup
 if [ -f /tmp/archive_backup_in_progress ]
@@ -41,8 +41,8 @@ fi
 #take archive backup from pgsql credentials
 echo "Starting archive database backup at `date`.."
 touch /tmp/archive_backup_in_progress
-tar -cf ${PGHOME}/${backupFile} ${PGARCHIVE}
-gzip ${PGHOME}/${backupFile}
+tar -czf ${PGHOME}/${backupFile} ${PGARCHIVE}
+#gzip ${PGHOME}/${backupFile}
 if [ $? -eq 0 ]
 	then
 	mv ${PGHOME}/${backupFile}.gz ${PGArchiveStorage}
