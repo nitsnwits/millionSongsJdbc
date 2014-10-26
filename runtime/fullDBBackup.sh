@@ -1,9 +1,9 @@
 #!/bin/bash
 #
 #	Full Database Backup Script, Will take backup at 4:00 am
-#   This script will be running in cron to take a full base backup at 4 am
-#   This backup will serve as base backup of every day
-#   Archive backup (WAL's) before this backup will not be needed then
+#	This script will be running in cron to take a full base backup at 4 am
+#	This backup will serve as base backup of every day
+#	Archive backup (WAL's) before this backup will not be needed then
 
 #global variables
 PGHOME=/Library/PostgreSQL/9.3
@@ -21,9 +21,9 @@ backupFile=`date +%Y-%m-%d_%H-%M`.tar
 if [ -f /tmp/backup_in_progress ]
 then
 	echo "Previous backup was not done properly. Attempting to stop.."
-    ${PGBIN}/psql -U ${PGUser} -p ${PGPassword} -c "select pg_stop_backup();"
-    rm /tmp/backup_in_progress
-    echo "Please run the script again."
+	${PGBIN}/psql -U ${PGUser} -p ${PGPassword} -c "select pg_stop_backup();"
+	rm /tmp/backup_in_progress
+	echo "Please run the script again."
 	exit 1
 else
 	echo "Previous backup check complete."
