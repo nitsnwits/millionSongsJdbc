@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#	Full System Backup Script, Will take backup at 4:00 am
+#	Full Database Backup Script, Will take backup at 4:00 am
 #   This script will be running in cron to take a full base backup at 4 am
 #   This backup will serve as base backup of every day
 #   Archive backup (WAL's) before this backup will not be needed then
@@ -30,10 +30,10 @@ else
 fi
 
 #take base backup from pgsql credentials
-echo "Starting full system backup at `date`.."
+echo "Starting full database backup at `date`.."
 touch /tmp/backup_in_progress
 ${PGBIN}/psql -U ${PGUser} -p ${PGPassword} -c "select pg_start_backup('hot_backup');"
 tar -cf ${PGFULLBACKUP}/${backupFile} ${PGDATA}
 ${PGBIN}/psql -U ${PGUser} -p {PGPassword} -c "select pg_stop_backup();"
 rm /tmp/backup_in_progress
-echo "Full system backup complete. Backup present in ${PGFULLBACKUP}/${backupFile} ."
+echo "Full database backup complete. Backup present in ${PGFULLBACKUP}/${backupFile} ."
