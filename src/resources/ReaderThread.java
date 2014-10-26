@@ -33,7 +33,7 @@ public class ReaderThread implements Runnable{
 				int randomInt = randomNumberGenerator.nextInt(maxCount) + 1; //to account for zero limit
 				//fire a query and log it
 				int queryResult = this.jdbcConnection.selectById(randomInt, "amazon_reviews");
-				if(i % 100 == 0) {
+				if(i % 500 == 0) {
 					Log.logger.info("Thread Id: " + threadId + " Query Result ID: " + queryResult);
 				}
 			}
