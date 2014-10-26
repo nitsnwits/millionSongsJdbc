@@ -25,7 +25,7 @@ public class ReaderThread implements Runnable{
 
 	private void processCommand() {
 		try {
-			//stub the thread here
+			//stub the thread here to catch interrupted exception
 			Thread.sleep(0);
 			
 			for(int i=1; i<=frequency; i++) {
@@ -33,7 +33,7 @@ public class ReaderThread implements Runnable{
 				int randomInt = randomNumberGenerator.nextInt(maxCount) + 1; //to account for zero limit
 				//fire a query and log it
 				int queryResult = this.jdbcConnection.selectById(randomInt, "amazon_reviews");
-				if(i % 500 == 0) {
+				if(i % 5000 == 0) {
 					Log.logger.info("Thread Id: " + threadId + " Query Result ID: " + queryResult);
 				}
 			}

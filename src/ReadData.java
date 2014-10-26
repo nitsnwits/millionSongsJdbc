@@ -45,6 +45,7 @@ public class ReadData {
 		while(!concurrentReadExecutor.isTerminated()) {
 		}
 		//make sure this is the last statement to be executed (vague though)
+		//TODO: fix this to let main thread wait for all the runners to come back
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
