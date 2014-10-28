@@ -119,11 +119,12 @@ public class ParseFile {
 					
 					//update the code to handle schema 3
 					jdbcConnection.insertSchema3(reviews, schema3ps1, schema3ps2);
-					if(rowNumber % 1000 == 0) {
+					if(rowNumber % 100000 == 0) {
 						jdbcConnection.executeBatch(schema3ps1, schema3ps2);
 						jdbcConnection.commit();
 						schema3ps1 = jdbcConnection.prepareStatement(4);
 						schema3ps2 = jdbcConnection.prepareStatement(5);
+						Log.logger.info("Commit rows: " + rowNumber);
 					}					
 					rowNumber++;
 					rowId++;

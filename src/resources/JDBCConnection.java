@@ -456,5 +456,22 @@ public class JDBCConnection {
 			Log.logger.error("Got null pointer exception.");
 		}
 	}
+	
+	public ResultSet queryBetween(String tableName, Long min, Long max) {
+		String sqlBetween = "SELECT * from "
+				+ tableName + " where id between " + Long.toString(min) + " and " + Long.toString(max);
+		ResultSet result = null;
+		try {
+			PreparedStatement ps = this.jdbcConnection.prepareStatement(sqlBetween);
+			result = ps.executeQuery();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Log.logger.error("Unable to select from database for between query.");
+		} catch (NullPointerException e) {
+			e.getCause();
+			Log.logger.error("Got null pointer exception running between query large read.");
+		}
+		return result;
+	}
 
 }
