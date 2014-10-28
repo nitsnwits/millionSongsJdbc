@@ -35,6 +35,9 @@ public class ParseFile {
 		PreparedStatement schema2ps1 = jdbcConnection.prepareStatement(1);
 		PreparedStatement schema2ps2 = jdbcConnection.prepareStatement(2);
 		PreparedStatement schema2ps3 = jdbcConnection.prepareStatement(3);
+		
+		PreparedStatement schema3ps1 = jdbcConnection.prepareStatement(4);
+		PreparedStatement schema3ps2 = jdbcConnection.prepareStatement(5);		
 
 		try {
 			//read the gzip file directly, to avoid decompression
@@ -105,24 +108,32 @@ public class ParseFile {
 //					}
 					
 					//update the code to handle schema 2
-					jdbcConnection.insertSchema2(reviews, schema2ps1, schema2ps2, schema2ps3);
+//					jdbcConnection.insertSchema2(reviews, schema2ps1, schema2ps2, schema2ps3);
+//					if(rowNumber % 1000 == 0) {
+//						jdbcConnection.executeBatch(schema2ps1, schema2ps2, schema2ps3);
+//						jdbcConnection.commit();
+//						schema2ps1 = jdbcConnection.prepareStatement(1);
+//						schema2ps2 = jdbcConnection.prepareStatement(2);
+//						schema2ps3 = jdbcConnection.prepareStatement(3);
+//					}
+					
+					//update the code to handle schema 3
+					jdbcConnection.insertSchema3(reviews, schema3ps1, schema3ps2);
 					if(rowNumber % 1000 == 0) {
-						jdbcConnection.executeBatch(schema2ps1, schema2ps2, schema2ps3);
+						jdbcConnection.executeBatch(schema3ps1, schema3ps2);
 						jdbcConnection.commit();
-						schema2ps1 = jdbcConnection.prepareStatement(1);
-						schema2ps2 = jdbcConnection.prepareStatement(2);
-						schema2ps3 = jdbcConnection.prepareStatement(3);
-					}
+						schema3ps1 = jdbcConnection.prepareStatement(4);
+						schema3ps2 = jdbcConnection.prepareStatement(5);
+					}					
 					rowNumber++;
 					rowId++;
 				}
 			}
 			//commit the final rows left in the batch, if less than the batch size
-			jdbcConnection.executeBatch(schema2ps1, schema2ps2, schema2ps3);
+			jdbcConnection.executeBatch(schema3ps1, schema3ps2);
 			jdbcConnection.commit();
-			schema2ps1 = jdbcConnection.prepareStatement(1);
-			schema2ps2 = jdbcConnection.prepareStatement(2);
-			schema2ps3 = jdbcConnection.prepareStatement(3);
+			schema3ps1 = jdbcConnection.prepareStatement(4);
+			schema3ps2 = jdbcConnection.prepareStatement(5);
 			Log.logger.info("Final Commit rows: " + rowNumber);
 			
 		} catch (FileNotFoundException e) {

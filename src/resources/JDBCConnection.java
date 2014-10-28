@@ -33,8 +33,13 @@ public class JDBCConnection {
 	private String sql2ProductReviews = "INSERT INTO product_reviews "
 			+ "(id, product_id, review_id) VALUES "
 			+ "(?,?,?)";
-	
 	private String reviewId;
+	private String sql3Products = "INSERT INTO products "
+			+ "(id, product_id, title, price) VALUES "
+			+ "(?,?,?,?)";
+	private String sql3Users = "INSERT INTO users "
+			+ "(id, product_id, user_id, profile_name, helpfulness, score, review_time, review_summary, review_text) VALUES "
+			+ "(?,?,?,?,?,?,?,?,?)";
 	//private String sqlCheckProductId = "SELECT count(*) from "
 	//private PreparedStatement preparedStatement;
 	//Have schema of each table available
@@ -224,6 +229,12 @@ public class JDBCConnection {
 			case 3:
 				result = this.jdbcConnection.prepareStatement(sql2ProductReviews);
 				break;
+			case 4:
+				result = this.jdbcConnection.prepareStatement(sql3Products);
+				break;
+			case 5:
+				result = this.jdbcConnection.prepareStatement(sql3Users);
+				break;
 			default:
 				result = this.jdbcConnection.prepareStatement(sqlInsert);
 			}
@@ -306,6 +317,29 @@ public class JDBCConnection {
 				Log.logger.error("Unable to rollback the batch, inconsistency may arise");
 			}
 		}
+	}
+	
+	public void executeBatch(PreparedStatement ps1, PreparedStatement ps2) {
+		try {
+			//execute the batch and reset prepared statement
+			ps1.executeBatch();
+			//reset ps
+			ps1.close();
+			ps2.executeBatch();
+			ps2.close();
+			//this.preparedStatement = this.jdbcConnection.prepareStatement(sqlInsert);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Log.logger.error("Unable to execute batch, rolling back");
+			
+			//try to rollback
+			try {
+				this.jdbcConnection.rollback();
+			} catch (SQLException e1) {
+				e1.printStackTrace();
+				Log.logger.error("Unable to rollback the batch, inconsistency may arise");
+			}
+		}
 	}	
 	
 	public int getCount(String tableName) {
@@ -375,6 +409,44 @@ public class JDBCConnection {
 			preparedStatement3.setString(2, row.get("productId"));
 			preparedStatement3.setString(3, reviewId);
 			preparedStatement3.addBatch();			
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			Log.logger.error("Unable to insert to database");
+		} catch (NullPointerException e) {
+			e.getCause();
+			Log.logger.error("Got null pointer exception.");
+		}
+	}
+	
+	//insert schema 3
+	public void insertSchema3(HashMap<String, String> row, PreparedStatement preparedStatement, PreparedStatement preparedStatement2) {
+		//Set insert in a table, this is insert for schema 2, schema is created using schema.conf	
+		try {
+			//Set generic values
+			reviewId = GenerateUUID.get().toString();
+			
+			//Set the prepared statement values for products
+			//PreparedStatement preparedStatement = this.jdbcConnection.prepareStatement(sql2Products);
+			preparedStatement.setInt(1,  Integer.parseInt(row.get("id")));
+			preparedStatement.setString(2, row.get("productId"));
+			preparedStatement.setString(3, row.get("title"));
+			preparedStatement.setString(4, row.get("price"));
+			preparedStatement.addBatch();
+
+			//Set the prepared statement values for user reviews
+			//PreparedStatement preparedStatement2 = this.jdbcConnection.prepareStatement(sql2UserReviews);
+			preparedStatement2.setInt(1,  Integer.parseInt(row.get("id")));
+			preparedStatement2.setString(2, row.get("productId"));
+			preparedStatement2.setString(3, row.get("userId"));
+			preparedStatement2.setString(4, row.get("profileName"));
+			preparedStatement2.setString(5, row.get("helpfulness"));
+			preparedStatement2.setDouble(6, Double.parseDouble(row.get("score")));
+			preparedStatement2.setInt(7, Integer.parseInt(row.get("time")));
+			preparedStatement2.setString(8, row.get("summary"));
+			preparedStatement2.setString(9, row.get("text"));			
+			
+			preparedStatement2.addBatch();		
 
 		} catch (SQLException e) {
 			e.printStackTrace();
