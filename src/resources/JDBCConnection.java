@@ -458,7 +458,8 @@ public class JDBCConnection {
 	}
 	
 	public ResultSet queryBetween(String tableName, Long min, Long max) {
-		String sqlBetween = "SELECT * from "
+		String sqlBetween = "SELECT id, product_id, title, price,"
+				+ " user_id, profile_name, score, helpfulness, review_time, review_summary, review_text from "
 				+ tableName + " where id between " + Long.toString(min) + " and " + Long.toString(max);
 		ResultSet result = null;
 		try {

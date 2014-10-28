@@ -2,10 +2,9 @@ package resources;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
-import java.util.List;
+import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.Vector;
-
-import javax.management.Query;
 
 public class LargeReadDBReader extends Thread{
 
@@ -13,8 +12,9 @@ public class LargeReadDBReader extends Thread{
 	JDBCConnection jdbcConnection = new JDBCConnection();
 	Connection dbConnection = jdbcConnection.getConnection();
 	static Long MAX = (long) 0;
+	HashMap<String, String> reviews = new HashMap<String, String>();
 	
-	static Vector<ResultSet> messages = new Vector();
+	static Vector<HashMap<String, String>> messages = new Vector();
 
 	@Override
 	public void run() {
@@ -42,7 +42,26 @@ public class LargeReadDBReader extends Thread{
 
 			if(max != MAX){
 				ResultSet message = this.jdbcConnection.queryBetween("amazon_reviews", min, max);
-				messages.addElement(message);
+				try {
+					while (message.next()) {
+						reviews.put("id", Integer.toString(message.getInt(1)));
+						reviews.put("product_id", message.getString(2));
+						reviews.put("title", message.getString(3));
+						reviews.put("price", message.getString(4));
+						reviews.put("user_id", message.getString(5));
+						reviews.put("profile_name", message.getString(6));
+						reviews.put("score", Double.toString(message.getDouble(7)));
+						reviews.put("helpfulness", message.getString(8));
+						reviews.put("review_time", Integer.toString(message.getInt(9)));
+						reviews.put("review_summary", message.getString(10));
+						reviews.put("review_text", message.getString(11));
+						messages.addElement(reviews);
+						reviews = new HashMap<String, String>();
+					}
+				} catch (SQLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			} else {
 				messages = null;
 			}
@@ -60,14 +79,14 @@ public class LargeReadDBReader extends Thread{
 	}
 
 	// Called by Consumer
-	public synchronized Vector<ResultSet> getMessage() throws InterruptedException {
+	public synchronized Vector<HashMap<String, String>> getMessage() throws InterruptedException {
 		notify();
 		while (messages.size() == 0) {
 			wait();//By executing wait() from a synchronized block, a thread gives up its hold on the lock and goes to sleep.
 		}
-		Vector<ResultSet> message = messages;
+		Vector<HashMap<String, String>> message = messages;
 		messages=null;
-		messages = new Vector<ResultSet>();
+		messages = new Vector<HashMap<String, String>>();
 		if(messages==null){
 			return null;
 		}
