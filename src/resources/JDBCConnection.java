@@ -90,6 +90,42 @@ public class JDBCConnection {
 		}		
 	}
 	
+	public JDBCConnection(String pgsqlUrl, String pgsqlUsername, String pgsqlPassword, String pgsqlAutoCommit) {
+		//over ride constructor if credentials are passed in
+		//this constructor is used to created shared jdbc connections
+		
+		//set JSON keys that are being passed in
+		this.pgsqlUrl = pgsqlUrl;
+		this.pgsqlUsername = pgsqlUsername;
+		this.pgsqlPassword = pgsqlPassword;
+
+		if (pgsqlAutoCommit.equalsIgnoreCase("false")) {
+			this.autoCommit = false;
+		} else if (pgsqlAutoCommit.equalsIgnoreCase("true")) {
+			this.autoCommit = true;
+		} else {
+			Log.logger.warn("No autocommit configuration set, using default: true");
+		}
+		
+		//register postgresql drivers
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			Log.logger.error("Postgresql driver not loaded.");
+		}
+		
+		//now, create jdbc connection
+		try {
+			this.jdbcConnection = DriverManager.getConnection(pgsqlUrl, pgsqlUsername, pgsqlPassword);
+			this.jdbcConnection.setAutoCommit(autoCommit);
+			
+			//create instance's prepared statement for batch processing
+			//this.jdbcConnection.prepareStatement(this.sqlInsert);
+		} catch (SQLException e) {
+			Log.logger.error("Unable to load connection to database.");
+		}		
+	}	
+	
 	public Connection getConnection() {
 		return this.jdbcConnection;
 	}

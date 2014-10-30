@@ -122,3 +122,5 @@ CREATE TRIGGER insert_reviews_trigger
 -- check partitioned tables cumulative query
 SET constraint_exclusion = on;
 SELECT count(*) FROM users;
+
+

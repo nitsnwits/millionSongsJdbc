@@ -39,6 +39,22 @@ public class CreateSchema {
 		this.dbConnection = new JDBCConnection();
 	}
 	
+	public CreateSchema(String filePath, JDBCConnection dbConnection) {
+		//file path is schema.conf file path
+		
+		//Read schema config from schema config file
+		this.schemaConfig = new ReadConfig(filePath);
+		this.schema = schemaConfig.get();
+		
+		//number of tables
+		this.schemaKeys = schema.keySet();
+		this.numOfTables = schemaKeys.size();
+		
+		//Having only one database connection for schema config
+		//get database connection
+		this.dbConnection = dbConnection;
+	}	
+	
 	public void run() {
 		HashMap<String, String> tableHash = new HashMap<String, String>();
 		//create table for each schema give in conf file
