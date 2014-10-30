@@ -39,14 +39,14 @@ public class LoadShardedData {
 			schemaCreation.run();
 			
 			//create schema for shard too
-			if(serverConfig.get("shard").equals("true")) {
-				JDBCConnection shardJdbcConnection = new JDBCConnection(config.get(shardPgConfig, "url"),
-						config.get(shardPgConfig, "username"), config.get(shardPgConfig, "password"),
-						config.get(shardPgConfig, "autoCommit"));
-				CreateSchema shardSchema = new CreateSchema("config/schema.conf", shardJdbcConnection);
-				shardSchema.run();
-				shardJdbcConnection.close();
-			}
+//			if(serverConfig.get("shard").equals("true")) {
+//				JDBCConnection shardJdbcConnection = new JDBCConnection(config.get(shardPgConfig, "url"),
+//						config.get(shardPgConfig, "username"), config.get(shardPgConfig, "password"),
+//						config.get(shardPgConfig, "autoCommit"));
+//				CreateSchema shardSchema = new CreateSchema("config/schema.conf", shardJdbcConnection);
+//				shardSchema.run();
+//				shardJdbcConnection.close();
+//			}
 		}
 		
 		//use one instance of parsefile
