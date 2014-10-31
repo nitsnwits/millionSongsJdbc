@@ -37,7 +37,10 @@ public class ParseFile {
 		PreparedStatement schema2ps3 = jdbcConnection.prepareStatement(3);
 		
 		PreparedStatement schema3ps1 = jdbcConnection.prepareStatement(4);
-		PreparedStatement schema3ps2 = jdbcConnection.prepareStatement(5);		
+		PreparedStatement schema3ps2 = jdbcConnection.prepareStatement(5);	
+		
+		Long prev = (long) 0;
+		Long cur = System.currentTimeMillis()/1000;
 
 		try {
 			//read the gzip file directly, to avoid decompression
@@ -124,7 +127,10 @@ public class ParseFile {
 						jdbcConnection.commit();
 						schema3ps1 = jdbcConnection.prepareStatement(4);
 						schema3ps2 = jdbcConnection.prepareStatement(5);
-						Log.logger.info("Commit rows: " + rowNumber);
+						prev = cur;
+						cur = System.currentTimeMillis()/1000;
+						Log.logger.info("Commit rows: " + rowNumber + " sysTime: " + (cur - prev));
+						
 					}					
 					rowNumber++;
 					rowId++;
