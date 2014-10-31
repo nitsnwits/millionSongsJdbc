@@ -131,7 +131,8 @@ public class ParseFile {
 						cur = System.currentTimeMillis()/1000;
 						Log.logger.info("Commit rows: " + rowNumber + " sysTime: " + (cur - prev));
 						
-					}					
+					}
+					reviews = new HashMap<String, String>();
 					rowNumber++;
 					rowId++;
 				}
